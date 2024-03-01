@@ -11,7 +11,15 @@ import {
   NavSections,
   NavUser,
 } from '@strapi/design-system/v2';
-import { useAppInfo, usePersistentState, useTracking } from '@strapi/helper-plugin';
+import {
+  SubNav,
+  SubNavHeader,
+  SubNavSection,
+  SubNavSections,
+  SubNavLink,
+  SubNavLinkSection,
+} from '@strapi/design-system/v2';
+import { useAppInfo, usePersistentState, useTracking, useCollator, useFilter } from '@strapi/helper-plugin';
 import { Exit, Write, Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
@@ -20,6 +28,10 @@ import styled from 'styled-components';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
 import { Menu } from '../hooks/useMenu';
+
+import { useTypedSelector } from '../core/store/hooks';
+import { getTranslation } from '../content-manager/utils/translations';
+
 
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
@@ -59,6 +71,7 @@ const NavLinkWrapper = styled(Box)`
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
+  const [search, setSearch] = React.useState('');
   const navUserRef = React.useRef<HTMLDivElement>(null!);
   const [userLinksVisible, setUserLinksVisible] = React.useState(false);
   const {
@@ -100,6 +113,73 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
     defaultMessage: 'Strapi Dashboard',
   });
 
+  /*functionalMenuItems*/
+  const { locale } = useIntl();
+
+  const { startsWith } = useFilter(locale, {
+    sensitivity: 'base',
+  });
+
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
+
+  const collectionTypeLinks = useTypedSelector(
+    (state) => state['content-manager_app'].collectionTypeLinks
+  );
+  const singleTypeLinks = useTypedSelector((state) => state['content-manager_app'].singleTypeLinks);
+
+  const fMenuItems = React.useMemo(
+    () =>
+      [
+        {
+          id: 'collectionTypes',
+          title: formatMessage({
+            id: getTranslation('components.LeftMenu.collection-types'),
+            defaultMessage: 'Collection Types',
+          }),
+          searchable: true,
+          links: collectionTypeLinks,
+        },
+        {
+          id: 'singleTypes',
+          title: formatMessage({
+            id: getTranslation('components.LeftMenu.single-types'),
+            defaultMessage: 'Single Types',
+          }),
+          searchable: true,
+          links: singleTypeLinks,
+        },
+      ].map((section) => ({
+        ...section,
+        links: section.links
+          /**
+           * Filter by the search value
+           */
+          .filter((link) => startsWith(link.title, search))
+          /**
+           * Sort correctly using the language
+           */
+          .sort((a, b) => formatter.compare(a.title, b.title))
+          /**
+           * Apply the formated strings to the links from react-intl
+           */
+          .map((link) => {
+            return {
+              ...link,
+              title: formatMessage({ id: link.title, defaultMessage: link.title }),
+            };
+          }),
+      })),
+    [collectionTypeLinks, search, singleTypeLinks, startsWith, formatMessage, formatter]
+  );
+
+  const functionalMenuItems = fMenuItems[0].links;
+  console.log('=functionalMenuItems', functionalMenuItems);
+  
+  // Revome "Release" from plugin
+  // pluginsSectionLinks.pop();
+
   return (
     <MainNav condensed={condensed}>
       <NavBrand
@@ -132,6 +212,16 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
         >
           {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
         </NavLink>
+
+        {/* <SubNavSection 
+          label="Course Management" 
+          collapsable 
+          // badgeLabel={functionalMenuItems.length.toString()}
+        >
+          {functionalMenuItems.map(link => <SubNavLink as={RouterNavLink} to={link.to} active={link.active} key={link.id}>
+              {link.title}
+            </SubNavLink>)}
+        </SubNavSection> */}
 
         {pluginsSectionLinks.length > 0 ? (
           <NavSection

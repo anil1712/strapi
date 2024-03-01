@@ -11,6 +11,7 @@ import { useCollator, useFilter } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
+import * as Icons from '@strapi/icons';
 import { useTypedSelector } from '../../core/store/hooks';
 import { getTranslation } from '../utils/translations';
 
@@ -87,6 +88,73 @@ const LeftMenu = () => {
     id: getTranslation('header.name'),
     defaultMessage: 'Content',
   });
+
+  console.log('==menu', menu);
+
+  const sidebarMenus = [{
+    key: 'question',
+    title: 'Question',
+    items: []
+  }, {
+    key: 'learn',
+    title: 'Course',
+    items: [],
+  }, {
+    key: 'news',
+    title: 'News',
+    items: []
+  }, {
+    key: 'more',
+    title: 'More',
+    items: []
+  }, {
+    key: 'about',
+    title: 'About',
+    items: []
+  }];
+
+  menu && menu.length && menu[0].links.forEach(k => {
+    sidebarMenus.forEach((y, index) => {
+      const _title = k.title.toLowerCase();
+      if(_title.startsWith(sidebarMenus[index].key)) {
+        const updatedTitle = _title.split(sidebarMenus[index].key)[1];
+        console.log('===updatedTitle', updatedTitle)
+        k.title = updatedTitle.trim();
+        // k.icon = <Icons.Pencil />
+        sidebarMenus[index].items.push(k);
+      }
+    });
+  });
+
+  console.log('===sidebarMenus', sidebarMenus);
+
+  return (
+    <SubNav ariaLabel={label}>
+      <SubNavHeader label={'Menus'} />
+      <SubNavSections>
+        {sidebarMenus.map((section) => {
+          return (
+            <SubNavSection
+              key={section.key}
+              label={section.title}
+              // badgeLabel={section.links.length.toString()}
+            >
+              {section.items.map((link) => {
+                // const search = link.search ? `?${link.search}` : '';
+
+                return (
+                  // @ts-expect-error – DS inference does not work with the `as` prop.
+                  <SubNavLink as={NavLink} key={link.uid} to={`${link.to}`} icon={link.icon}>
+                    <span style={{textTransform: 'capitalize'}}>{link.title}</span>
+                  </SubNavLink>
+                );
+              })}
+            </SubNavSection>
+          );
+        })}
+      </SubNavSections>
+    </SubNav>
+  );
 
   return (
     <SubNav ariaLabel={label}>

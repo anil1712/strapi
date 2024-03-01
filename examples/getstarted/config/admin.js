@@ -18,4 +18,6 @@ module.exports = ({ env }) => ({
     nps: env.bool('FLAG_NPS', true),
     promoteEE: env.bool('FLAG_PROMOTE_EE', true),
   },
+  url: "/", // Note: The administration will be accessible from the root of the domain (ex: http://yourfrontend.com/)
+  serveAdminPanel: false, // http://yourbackend.com will not serve any static admin files
 });

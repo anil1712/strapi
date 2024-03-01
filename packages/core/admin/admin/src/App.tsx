@@ -46,6 +46,7 @@ interface AppProps extends Omit<ConfigurationProviderProps, 'children' | 'authLo
 }
 
 export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials }: AppProps) => {
+  console.log('Hello....');
   // @ts-expect-error – we need to type the useEnterprise hook better, in this circumstance we know it'll either be the CE data or a merge of the two.
   const adminPermissions: Partial<PermissionMap> = useEnterprise(
     ADMIN_PERMISSIONS_CE,

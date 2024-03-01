@@ -21,11 +21,11 @@ module.exports = () => ({
       },
     },
   },
-  myplugin: {
-    enabled: true,
-    resolve: `./src/plugins/local-plugin`, // From the root of the project
-    config: {
-      testConf: 3,
-    },
-  },
+  // myplugin: {
+  //   enabled: true,
+  //   resolve: `./src/plugins/local-plugin`, // From the root of the project
+  //   config: {
+  //     testConf: 3,
+  //   },
+  // },
 });

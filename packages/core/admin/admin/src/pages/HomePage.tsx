@@ -141,7 +141,7 @@ const HomePageCE = () => {
             <GridItem col={4} s={12}>
               <SocialLinks />
             </GridItem>
-          </Grid>
+          </Grid> 
         </Box>
       </Main>
     </Layout>
